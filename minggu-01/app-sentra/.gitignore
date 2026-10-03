@@ -5,3 +5,5 @@ __pycache__/
 *.log
 app.log
 ringkasan-log.txt
+
+# File yang diabaikan Git - Praktikum DevOps M03
