@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MSG_FILE="$1"
+MSG=$(head -n 1 "$MSG_FILE")
+
+PATTERN='^(feat|fix|docs|chore|refactor|test|style|perf|build|ci|revert)(\(.+\))?: .+'
+
+if ! echo "$MSG" | grep -qE "$PATTERN"; then
+  echo "❌ COMMIT DITOLAK: pesan commit tidak mengikuti Conventional Commits." >&2
+  echo "   Format: <tipe>(<scope>): <deskripsi>" >&2
+  echo "   Tipe yang diizinkan: feat, fix, docs, chore, refactor, test" >&2
+  echo "   Contoh: feat(auth): tambahkan login via SSH" >&2
+  exit 1
+fi
+
+exit 0

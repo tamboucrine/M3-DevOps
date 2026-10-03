@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔍 Menjalankan pre-commit hook..."
+
+# 1. Cek pola kredensial pada diff yang di-staged
+STAGED_FILES=$(git diff --cached --name-only)
+if [ -n "$STAGED_FILES" ]; then
+  if git diff --cached | grep -nEi '(ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|(PASSWORD|SECRET|TOKEN)[[:space:]]*=[[:space:]]*[^[:space:]]+)'; then
+    echo "❌ COMMIT DITOLAK: terdeteksi pola kredensial pada perubahan yang di-staged." >&2
+    echo "   Hapus/rotasi kredensial terlebih dahulu, lalu coba lagi." >&2
+    exit 1
+  fi
+fi
+
+# 2. Jalankan shellcheck pada file .sh yang di-staged
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep '\.sh$' || true); do
+  if command -v shellcheck >/dev/null 2>&1; then
+    if ! shellcheck "$file"; then
+      echo "❌ COMMIT DITOLAK: shellcheck menemukan masalah pada $file" >&2
+      exit 1
+    fi
+  fi
+done
+
+echo "✅ Pre-commit check lulus."
+exit 0
